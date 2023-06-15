@@ -44,7 +44,6 @@ lyrics_database = {
 }
 
 
-
 class LyricsGameGUI:
     def __init__(self, master):
         self.master = master
@@ -57,6 +56,9 @@ class LyricsGameGUI:
         x = math.floor((screen_width - window_width) / 2)
         y = math.floor((screen_height - window_height) / 2)
         self.master.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+        self.master.config(bg="#F0F0F0")  # Set the background color to light gray
+
 
         self.score = 0
         self.num_questions = 5
@@ -105,10 +107,36 @@ class LyricsGameGUI:
 
         # Generate color palette using Colormind API
         palette = generate_color_palette()
-        if palette:
-            # Assign a unique color to each choice button from the generated palette
+        if palette and len(palette) >= 5:
+            # Calculate sums for each color in the palette
+            sums = [sum(color) for color in palette]
+
+            # Find the indices of the two colors with the most difference in sums
+            max_diff = 0
+            color_index1 = 0
+            color_index2 = 0
+            for i in range(len(palette)):
+                for j in range(i + 1, len(palette)):
+                    diff = abs(sums[i] - sums[j])
+                    if diff > max_diff:
+                        max_diff = diff
+                        color_index1 = i
+                        color_index2 = j
+
+            # Assign the colors with the most difference as foreground and background colors
+            fg_color = palette[color_index1]
+            bg_color = palette[color_index2]
+
+            # Convert colors to hexadecimal representation
+            fg_hex = rgb_to_hex(fg_color)
+            bg_hex = rgb_to_hex(bg_color)
+
+            # Set the colors for the lyrics label
+            self.question_label.configure(fg=fg_hex, bg=bg_hex)
+
+            # Assign a unique color to each choice button from the remaining colors in the palette
             for i, button in enumerate(self.choices_buttons):
-                color = palette[i % len(palette)]
+                color = palette[(i + 2) % len(palette)]  # Start from the third color in the palette
                 bg_color = rgb_to_hex(color)
 
                 style = ttk.Style()
@@ -116,12 +144,6 @@ class LyricsGameGUI:
                 style.configure(style_name, background=bg_color, foreground="#ffffff")
 
                 button.configure(style=style_name)
-
-            # Assign a color to the master window and the question label
-            color = palette[-1]
-            bg_color = rgb_to_hex(color)
-            self.master.configure(bg=bg_color)
-            self.question_label.configure(bg=bg_color)
 
         self.current_question += 1
 
