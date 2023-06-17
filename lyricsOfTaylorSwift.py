@@ -1,11 +1,12 @@
-import tkinter as tk
-import random
-import requests
-from tkinter import messagebox
-import tkinter.ttk as ttk
-import math
-import json
+import tkinter as tk  # For GUI components
+import tkinter.ttk as ttk  # For styled GUI components
+from tkinter import messagebox  # For displaying result dialogues
+import random  # For random color and choice generation
+import requests  # For API requests
+import json  # For parsing API responses
 
+
+# The database of lyrics and their corresponding songs
 lyrics_database = {
     "And I know I'm gonna be with you so I take my time.": "Taylor Swift - Wildest Dreams",
     "We could get married, have a few kids and live in the suburbs.": "Taylor Swift - Love Story",
@@ -44,7 +45,18 @@ lyrics_database = {
 }
 
 
+# Function to generate random colors in hexadecimal format
+def generate_random_color():
+    # Generate a random integer for each color component (Red, Green, Blue)
+    r = random.randint(0,255)
+    g = random.randint(0,255)
+    b = random.randint(0,255)
+    # Return the color in hexadecimal format
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+# Class definition for the Lyrics Game GUI
 class LyricsGameGUI:
+    # Initializer
     def __init__(self, master):
         self.master = master
         self.master.title("Taylor Swift Lyrics Game - Score: 0")  # Set title directly
@@ -53,8 +65,8 @@ class LyricsGameGUI:
         screen_height = self.master.winfo_screenheight()
         window_width = 600
         window_height = 400
-        x = math.floor((screen_width - window_width) / 2)
-        y = math.floor((screen_height - window_height) / 2)
+        x = ((screen_width - window_width) // 2)
+        y = ((screen_height - window_height) // 2)
         self.master.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
         self.master.config(bg="#F0F0F0")  # Set the background color to light gray
@@ -65,7 +77,9 @@ class LyricsGameGUI:
         self.current_question = 0
 
         self.question_text = tk.StringVar()
-        self.choices_text = [tk.StringVar() for _ in range(4)]
+        self.choices_text = []
+        for _ in range(4):
+            self.choices_text.append(tk.StringVar())
 
         self.question_label = tk.Label(master, textvariable=self.question_text, wraplength=500,
                                        font=("Helvetica", 16, "bold"), bg="#ffffff", fg="#333333")
@@ -76,9 +90,11 @@ class LyricsGameGUI:
         for i in range(4):
             style_name = f"Color{i}.TButton"
             style = ttk.Style()
+            random_color_bg = generate_random_color()
+            random_color_fg = generate_random_color()
             style.map(style_name,
-                      background=[("active", "black"), ("!active", "black")],
-                      foreground=[("active", "purple"), ("!active", "purple")])
+                      background=[("active", random_color_bg), ("!active", random_color_bg)],
+                      foreground=[("active", random_color_fg), ("!active", random_color_fg)])
             self.button_styles.append(style)
 
             choice_button = ttk.Button(master, textvariable=self.choices_text[i], width=40,
@@ -87,9 +103,11 @@ class LyricsGameGUI:
             self.choices_buttons.append(choice_button)
         self.next_question()
 
+    # Method to update the window title with the current score
     def update_title(self):
         self.master.title(f"Taylor Swift Lyrics Game - Score: {self.score}")
 
+    # Method to move to the next question or finish the game
     def next_question(self):
         if self.current_question >= self.num_questions:
             messagebox.showinfo("Game Over", f"Your final score is {self.score}/{self.num_questions}")
@@ -147,6 +165,7 @@ class LyricsGameGUI:
 
         self.current_question += 1
 
+    # Method to check if the selected answer is correct
     def check_selection(self, selected):
         if check_answer(self.question_text.get(), [choice.get() for choice in self.choices_text],
                         lyrics_database[self.question_text.get()], selected):
@@ -155,12 +174,14 @@ class LyricsGameGUI:
         self.next_question()
 
 
+# Function to get a random question and its answer from the database
 def get_random_question():
     question = random.choice(list(lyrics_database.keys()))
     answer = lyrics_database[question]
     return question, answer
 
 
+# Function to check the selected answer and display the result
 def check_answer(question, choices, answer, selected):
     if choices[selected] == answer:
         messagebox.showinfo("Result", "Correct!")
@@ -170,6 +191,7 @@ def check_answer(question, choices, answer, selected):
         return False
 
 
+# Function to generate a color palette using the Colormind API
 def generate_color_palette():
     url = 'http://colormind.io/api/'
     data = {
@@ -186,17 +208,24 @@ def generate_color_palette():
         return None
 
 
+# Function to convert RGB color values to hexadecimal format
 def rgb_to_hex(color):
-    return f"#{''.join(f'{c:02x}' for c in color)}"
+    return f"#{''.join(f'{c:02x}' for c in color)}"  # Convert RGB color values to hexadecimal representation
 
-
+# Function to start the game
 def play_game():
+    # Create the root window
     root = tk.Tk()
+    # Set the background color of the window
     root.config(bg="#111111")
+    # Configure the style of the buttons
     ttk.Style().configure('TButton', font=('Helvetica', 14), foreground='black')
+    # Create an instance of the game GUI
     game = LyricsGameGUI(root)
+    # Start the main event loop
     root.mainloop()
 
-
+# Main execution
 if __name__ == "__main__":
+    # Start the game
     play_game()
