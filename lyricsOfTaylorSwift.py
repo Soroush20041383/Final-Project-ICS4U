@@ -5,7 +5,7 @@ import random  # For random color and choice generation
 import requests  # For API requests
 import json  # For parsing API responses
 
-
+heart_symbol = u"\u2764"
 # The database of lyrics and their corresponding songs
 lyrics_database = {
     "And I know I'm gonna be with you so I take my time.": "Taylor Swift - Wildest Dreams",
@@ -59,7 +59,7 @@ class LyricsGameGUI:
     # Initializer
     def __init__(self, master):
         self.master = master
-        self.master.title("Taylor Swift Lyrics Game - Score: 0")  # Set title directly
+        self.master.title(u"\u2764 Taylor Swift Lyrics Game - Score: 0") # Set title directly
 
         screen_width = self.master.winfo_screenwidth()
         screen_height = self.master.winfo_screenheight()
